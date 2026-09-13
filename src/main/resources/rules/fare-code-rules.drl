@@ -1,0 +1,39 @@
+package com.supplierdata.platform.rules
+
+import com.supplierdata.platform.rules.FareCodeFact;
+import com.supplierdata.platform.rules.RuleResult;
+
+// Mirrors "Fare Code Rule Types" from the original platform's Rule
+// Management module: business rules keyed off fare category.
+
+rule "Non-refundable promo fares require manual review"
+    when
+        $fact : FareCodeFact(category == "PROMO", refundable == false)
+        $result : RuleResult()
+    then
+        $result.flagForReview("Non-refundable PROMO fare " + $fact.getFareCode() + " requires manual review");
+end
+
+rule "Restricted fares over 50 percent discount require manual review"
+    when
+        $fact : FareCodeFact(category == "RESTRICTED", discountPercentage.doubleValue() > 50.0)
+        $result : RuleResult()
+    then
+        $result.flagForReview("RESTRICTED fare " + $fact.getFareCode() + " exceeds 50% discount threshold");
+end
+
+rule "Flexible refundable fares auto-approve"
+    when
+        $fact : FareCodeFact(category == "FLEXIBLE", refundable == true)
+        $result : RuleResult()
+    then
+        $result.addNote("FLEXIBLE refundable fare " + $fact.getFareCode() + " auto-approved");
+end
+
+rule "Unknown fare category flagged"
+    when
+        $fact : FareCodeFact(category not in ("PROMO", "RESTRICTED", "FLEXIBLE"))
+        $result : RuleResult()
+    then
+        $result.flagForReview("Unrecognized fare category for code " + $fact.getFareCode());
+end

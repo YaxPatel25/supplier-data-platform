@@ -1,0 +1,11 @@
+{
+  "bookings": [
+    {
+      "supplier": "SUP-003",
+      "line": "Pacific Line",
+      "vessel": "Coral Dream",
+      "departure": "2026-10-20",
+      "fare": "RESTRICT05"
+    }
+  ]
+}

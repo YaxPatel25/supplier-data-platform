@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:supplierdata;MODE=MSSQLServer
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+logging:
+  level:
+    com.supplierdata.platform: DEBUG

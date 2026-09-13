@@ -1,0 +1,9 @@
+<SupplierFeed>
+    <Booking>
+        <Supplier>SUP-002</Supplier>
+        <Line>Azure Cruises</Line>
+        <Vessel>Horizon Voyager</Vessel>
+        <Departure>2026-12-15</Departure>
+        <Fare>FLEX20</Fare>
+    </Booking>
+</SupplierFeed>

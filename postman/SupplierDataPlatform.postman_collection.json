@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "Supplier Data Integration Platform",
+    "description": "Endpoints for supplier submissions, fare code rule evaluation, and CruiseCache-style availability lookups.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Submit CSV supplier data",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:8080/api/v1/suppliers/submissions", "host": ["localhost"], "port": "8080", "path": ["api","v1","suppliers","submissions"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"format\": \"CSV\",\n  \"payload\": \"supplierCode,cruiseLine,shipName,sailingDate,fareCode\\nSUP-001,Royal Seas,Ocean Star,2026-11-02,PROMO10\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Submit JSON supplier data",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:8080/api/v1/suppliers/submissions", "host": ["localhost"], "port": "8080", "path": ["api","v1","suppliers","submissions"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"format\": \"JSON\",\n  \"payload\": \"{ \\\"bookings\\\": [{ \\\"supplier\\\": \\\"SUP-003\\\", \\\"line\\\": \\\"Pacific Line\\\", \\\"vessel\\\": \\\"Coral Dream\\\", \\\"departure\\\": \\\"2026-10-20\\\", \\\"fare\\\": \\\"RESTRICT05\\\" }] }\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get all supplier records",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/v1/supplier-records", "host": ["localhost"], "port": "8080", "path": ["api","v1","supplier-records"] }
+      }
+    },
+    {
+      "name": "Create fare code",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:8080/api/v1/fare-codes", "host": ["localhost"], "port": "8080", "path": ["api","v1","fare-codes"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"PROMO10\",\n  \"description\": \"10% promo fare\",\n  \"category\": \"PROMO\",\n  \"refundable\": false,\n  \"discountPercentage\": 10\n}"
+        }
+      }
+    },
+    {
+      "name": "Evaluate fare code rules",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/v1/fare-codes/PROMO10/evaluate", "host": ["localhost"], "port": "8080", "path": ["api","v1","fare-codes","PROMO10","evaluate"] }
+      }
+    },
+    {
+      "name": "CruiseCache availability lookup",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/api/v1/cruise-cache/availability?shipName=Ocean Star&sailingDate=2026-11-02", "host": ["localhost"], "port": "8080", "path": ["api","v1","cruise-cache","availability"], "query": [{"key":"shipName","value":"Ocean Star"},{"key":"sailingDate","value":"2026-11-02"}] }
+      }
+    },
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8080/actuator/health", "host": ["localhost"], "port": "8080", "path": ["actuator","health"] }
+      }
+    }
+  ]
+}
