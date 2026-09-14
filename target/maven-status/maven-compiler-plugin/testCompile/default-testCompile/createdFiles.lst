@@ -1,0 +1,4 @@
+com\supplierdata\platform\controller\SupplierApiControllerTest.class
+com\supplierdata\platform\rules\FareCodeRuleServiceTest.class
+com\supplierdata\platform\transform\CsvNormalizerTest.class
+com\supplierdata\platform\transform\TextFlatFileParserTest.class

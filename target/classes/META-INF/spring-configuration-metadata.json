@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "office",
+      "type": "com.supplierdata.platform.config.OfficeConfigProperties",
+      "sourceType": "com.supplierdata.platform.config.OfficeConfigProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "office.sites",
+      "type": "java.util.Map<java.lang.String,com.supplierdata.platform.config.OfficeConfigProperties$OfficePreference>",
+      "description": "Office\/site code -> preference map, e.g. \"LON\": { currency: \"GBP\" }",
+      "sourceType": "com.supplierdata.platform.config.OfficeConfigProperties"
+    }
+  ],
+  "hints": []
+}

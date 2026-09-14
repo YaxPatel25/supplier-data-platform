@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST API for suppliers submitting data through direct API integrations --
- * equivalent to "Developed and supported RESTful Web APIs for suppliers
- * submitting data through API integrations" in the original role. Accepts
- * a raw payload plus its declared format (CSV/XML/JSON/TEXT).
+ * REST API for suppliers submitting data through direct API integrations,
+ * Azure Data Lake Storage, and FTP/SFTP remote sources.
  */
 @RestController
 @RequestMapping("/api/v1/suppliers")
@@ -24,11 +22,54 @@ public class SupplierApiController {
         this.ingestionService = ingestionService;
     }
 
-    public record SupplierSubmission(@NotBlank String format, @NotBlank String payload) {}
+    public record SupplierSubmission(
+            String supplierCode,
+            @NotBlank String format,
+            String sourceType,
+            @NotBlank String payload
+    ) {}
+
+    public record AzureDataLakeIngestRequest(
+            String supplierCode,
+            @NotBlank String format,
+            @NotBlank String containerName,
+            @NotBlank String filePath
+    ) {}
+
+    public record FtpIngestRequest(
+            String supplierCode,
+            @NotBlank String format,
+            @NotBlank String remotePath
+    ) {}
 
     @PostMapping("/submissions")
     public ResponseEntity<List<SupplierRecord>> submit(@RequestBody SupplierSubmission submission) {
-        List<SupplierRecord> saved = ingestionService.ingest(submission.payload(), submission.format());
+        String suppCode = (submission.supplierCode() != null && !submission.supplierCode().isBlank())
+                ? submission.supplierCode() : "DEFAULT";
+        String srcType = (submission.sourceType() != null && !submission.sourceType().isBlank())
+                ? submission.sourceType() : "REST_API";
+
+        List<SupplierRecord> saved = ingestionService.ingest(suppCode, submission.format(), srcType, submission.payload(), "api-submission");
+        return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/ingest/azure")
+    public ResponseEntity<List<SupplierRecord>> ingestAzure(@RequestBody AzureDataLakeIngestRequest request) {
+        String suppCode = (request.supplierCode() != null && !request.supplierCode().isBlank())
+                ? request.supplierCode() : "DEFAULT";
+
+        List<SupplierRecord> saved = ingestionService.ingestFromAzureDataLake(
+                suppCode, request.format(), request.containerName(), request.filePath());
+        return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/ingest/ftp")
+    public ResponseEntity<List<SupplierRecord>> ingestFtp(@RequestBody FtpIngestRequest request) {
+        String suppCode = (request.supplierCode() != null && !request.supplierCode().isBlank())
+                ? request.supplierCode() : "DEFAULT";
+
+        List<SupplierRecord> saved = ingestionService.ingestFromFtp(
+                suppCode, request.format(), request.remotePath());
         return ResponseEntity.ok(saved);
     }
 }

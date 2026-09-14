@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: supplier-data-platform
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  batch:
+    job:
+      enabled: false # jobs are launched explicitly, not on every app start
+    jdbc:
+      initialize-schema: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+supplier:
+  dropzone:
+    path: ./dropzone
+
+cruisecache:
+  base-url: https://example-supplier.invalid
+
+resilience4j:
+  retry:
+    instances:
+      cruiseCacheApi:
+        max-attempts: 3
+        wait-duration: 500ms
+  circuitbreaker:
+    instances:
+      cruiseCacheApi:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+# Site Preferences / Office Setup, per-office overrides
+office:
+  sites:
+    NYC:
+      default-currency: USD
+      default-locale: en-US
+      auto-approve-fare-rules: false
+      supplier-data-format: CSV
+    LON:
+      default-currency: GBP
+      default-locale: en-GB
+      auto-approve-fare-rules: true
+      supplier-data-format: XML

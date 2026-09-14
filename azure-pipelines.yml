@@ -1,0 +1,146 @@
+# Azure DevOps CI/CD Pipeline for Supplier Data Integration Platform
+# Triggers on main/master branch commits and pull requests
+trigger:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/**'
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+variables:
+  # Pipeline configuration variables
+  azureSubscription: 'Azure-Service-Connection'
+  azureResourceGroup: 'rg-supplier-platform-prod'
+  azureContainerRegistry: 'myacr.azurecr.io'
+  dockerRegistryServiceConnection: 'ACR-Service-Connection'
+  imageRepository: 'supplier-data-platform'
+  kubernetesServiceConnection: 'AKS-Service-Connection'
+  kubernetesNamespace: 'supplier-data'
+  tag: '$(Build.BuildId)'
+
+stages:
+  # ==========================================
+  # Stage 1: Build & Unit Test
+  # ==========================================
+  - stage: BuildAndTest
+    displayName: '1. Build & Test'
+    jobs:
+      - job: MavenBuild
+        displayName: 'Maven Build & Test'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: '21'
+              jdkArchitectureOption: 'x64'
+              jdkSourceOption: 'PreInstalled'
+
+          - task: Cache@2
+            inputs:
+              key: 'maven | "$(Agent.OS)" | pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+              path: $(HOME)/.m2/repository
+            displayName: 'Cache Maven packages'
+
+          - task: Maven@4
+            displayName: 'Run Maven Unit Tests & Package'
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean test package'
+              options: '-DskipTests=false'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+          - task: PublishCodeCoverageResults@2
+            displayName: 'Publish Code Coverage'
+            inputs:
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/site/jacoco/jacoco.xml'
+
+  # ==========================================
+  # Stage 2: Containerize & Push to ACR
+  # ==========================================
+  - stage: Containerize
+    displayName: '2. Docker Build & Push to ACR'
+    dependsOn: BuildAndTest
+    condition: succeeded()
+    jobs:
+      - job: DockerBuildAndPush
+        displayName: 'Build & Push Docker Image'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Docker@2
+            displayName: 'Build and Push Docker Image to ACR'
+            inputs:
+              command: 'buildAndPush'
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(imageRepository)'
+              dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              tags: |
+                $(tag)
+                latest
+
+  # ==========================================
+  # Stage 3: Deploy to Azure Kubernetes Service (AKS)
+  # ==========================================
+  - stage: DeployToAKS
+    displayName: '3. Deploy to Azure Kubernetes Service'
+    dependsOn: Containerize
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: Deploy
+        displayName: 'Deploy Kubernetes Manifests'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'production.supplier-data'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: KubernetesManifest@1
+                  displayName: 'Create Namespace'
+                  inputs:
+                    action: 'deploy'
+                    connectionType: 'kubernetesServiceConnection'
+                    kubernetesServiceConnection: '$(kubernetesServiceConnection)'
+                    manifests: |
+                      $(Pipeline.Workspace)/s/k8s/configmap.yaml
+                      $(Pipeline.Workspace)/s/k8s/secret.yaml
+                    namespace: '$(kubernetesNamespace)'
+
+                - task: KubernetesManifest@1
+                  displayName: 'Deploy to AKS Cluster'
+                  inputs:
+                    action: 'deploy'
+                    connectionType: 'kubernetesServiceConnection'
+                    kubernetesServiceConnection: '$(kubernetesServiceConnection)'
+                    namespace: '$(kubernetesNamespace)'
+                    manifests: |
+                      $(Pipeline.Workspace)/s/k8s/configmap.yaml
+                      $(Pipeline.Workspace)/s/k8s/secret.yaml
+                      $(Pipeline.Workspace)/s/k8s/deployment.yaml
+                      $(Pipeline.Workspace)/s/k8s/service.yaml
+                      $(Pipeline.Workspace)/s/k8s/hpa.yaml
+                      $(Pipeline.Workspace)/s/k8s/ingress.yaml
+                    containers: |
+                      $(azureContainerRegistry)/$(imageRepository):$(tag)
+
+                - task: Kubernetes@1
+                  displayName: 'Verify Rollout Status'
+                  inputs:
+                    connectionType: 'Kubernetes Service Connection'
+                    kubernetesServiceEndpoint: '$(kubernetesServiceConnection)'
+                    namespace: '$(kubernetesNamespace)'
+                    command: 'rollout'
+                    arguments: 'status deployment/supplier-data-platform'

@@ -23,6 +23,9 @@ public class SupplierRecord {
     private String sourceFormat; // TEXT, CSV, XML, JSON
 
     @Column(nullable = false)
+    private String sourceType = "REST_API"; // REST_API, AZURE_DATA_LAKE, FTP, DROPZONE
+
+    @Column(nullable = false)
     private String cruiseLine;
 
     @Column(nullable = false)
@@ -53,6 +56,9 @@ public class SupplierRecord {
 
     public String getSourceFormat() { return sourceFormat; }
     public void setSourceFormat(String sourceFormat) { this.sourceFormat = sourceFormat; }
+
+    public String getSourceType() { return sourceType; }
+    public void setSourceType(String sourceType) { this.sourceType = sourceType; }
 
     public String getCruiseLine() { return cruiseLine; }
     public void setCruiseLine(String cruiseLine) { this.cruiseLine = cruiseLine; }

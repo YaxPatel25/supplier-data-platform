@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+*.iml
+.mvn
+target
+dropzone/*
+ftp-dropzone/*
+azure-datalake-dropzone/*
+azure-pipelines.yml
+k8s/
+README.md
+Dockerfile
+.dockerignore

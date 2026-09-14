@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: supplier-data-platform-service
+  namespace: supplier-data
+  labels:
+    app: supplier-data-platform
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: supplier-data-platform

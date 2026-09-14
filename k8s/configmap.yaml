@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supplier-platform-config
+  namespace: supplier-data
+  labels:
+    app: supplier-data-platform
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_HOST: "sqlserver-service.database.svc.cluster.local"
+  DB_NAME: "supplierdata"
+  AZURE_DATALAKE_ACCOUNT_NAME: "supplierdatalake"
+  FTP_SERVER_HOST: "ftp.supplier-platform.internal"
+  FTP_SERVER_PORT: "21"
+  FTP_SERVER_USERNAME: "supplier-service"

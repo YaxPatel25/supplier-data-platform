@@ -1,0 +1,28 @@
+-------------------------------------------------------------------------------
+Test set: com.supplierdata.platform.rules.FareCodeRuleServiceTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.072 s <<< FAILURE! -- in com.supplierdata.platform.rules.FareCodeRuleServiceTest
+com.supplierdata.platform.rules.FareCodeRuleServiceTest.flagsNonRefundablePromoForManualReview -- Time elapsed: 0.009 s <<< ERROR!
+java.lang.RuntimeException: Cannot find a default KieSession
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.findKieSessionModel(KieContainerImpl.java:557)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:600)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:530)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:513)
+	at com.supplierdata.platform.rules.FareCodeRuleService.evaluate(FareCodeRuleService.java:32)
+	at com.supplierdata.platform.rules.FareCodeRuleServiceTest.flagsNonRefundablePromoForManualReview(FareCodeRuleServiceTest.java:22)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.supplierdata.platform.rules.FareCodeRuleServiceTest.autoApprovesFlexibleRefundableFare -- Time elapsed: 0.003 s <<< ERROR!
+java.lang.RuntimeException: Cannot find a default KieSession
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.findKieSessionModel(KieContainerImpl.java:557)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:600)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:530)
+	at org.drools.compiler.kie.builder.impl.KieContainerImpl.newKieSession(KieContainerImpl.java:513)
+	at com.supplierdata.platform.rules.FareCodeRuleService.evaluate(FareCodeRuleService.java:32)
+	at com.supplierdata.platform.rules.FareCodeRuleServiceTest.autoApprovesFlexibleRefundableFare(FareCodeRuleServiceTest.java:36)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
